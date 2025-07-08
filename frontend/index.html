@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Marca Chancho - Buscador</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      padding: 2rem;
+      background-color: #f9f9f9;
+    }
+    input, button {
+      padding: 0.5rem;
+      font-size: 1rem;
+    }
+    pre {
+      background: #eee;
+      padding: 1rem;
+      margin-top: 1rem;
+      white-space: pre-wrap;
+    }
+  </style>
+</head>
+<body>
+  <h1>🔍 Buscar producto en Marca Chancho</h1>
+  <input type="text" id="busqueda" placeholder="Ej: auriculares" />
+  <button onclick="buscar()">Buscar</button>
+
+  <pre id="resultado">Esperando búsqueda...</pre>
+
+  <script>
+    async function buscar() {
+      const q = document.getElementById("busqueda").value;
+      const resultado = document.getElementById("resultado");
+      resultado.textContent = "Buscando...";
+
+      try {
+        const res = await fetch(`https://marca-chancho.onrender.com/buscar?q=${encodeURIComponent(q)}`);
+        const data = await res.json();
+        resultado.textContent = JSON.stringify(data, null, 2);
+      } catch (error) {
+        resultado.textContent = "Error al buscar: " + error;
+      }
+    }
+  </script>
+</body>
+</html>
