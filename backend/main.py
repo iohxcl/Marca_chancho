@@ -17,4 +17,19 @@ def root():
 
 @app.get("/buscar")
 def buscar_producto(q: str):
-    return {"producto_buscado": q}
+    return {
+        "resultados": [
+            {
+                "nombre": f"{q} Pro Max",
+                "precio": "$19.99",
+                "imagen": "https://via.placeholder.com/150",
+                "link": "https://aliexpress.com/item/123"
+            },
+            {
+                "nombre": f"{q} Lite",
+                "precio": "$9.99",
+                "imagen": "https://via.placeholder.com/150",
+                "link": "https://aliexpress.com/item/456"
+            }
+        ]
+    }
