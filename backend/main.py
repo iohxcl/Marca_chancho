@@ -1,5 +1,7 @@
+import httpx
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+import os
 
 app = FastAPI()
 
@@ -11,25 +13,35 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-@app.get("/")
-def root():
-    return {"mensaje": "¡Marca Chancho API está viva!"}
-
 @app.get("/buscar")
 def buscar_producto(q: str):
-    return {
-        "resultados": [
-            {
-                "nombre": f"{q} Pro Max",
-                "precio": "$19.99",
-                "imagen": "https://via.placeholder.com/150",
-                "link": "https://aliexpress.com/item/123"
-            },
-            {
-                "nombre": f"{q} Lite",
-                "precio": "$9.99",
-                "imagen": "https://via.placeholder.com/150",
-                "link": "https://aliexpress.com/item/456"
-            }
-        ]
+    app_id = os.getenv("ALIEXPRESS_APP_ID")
+    url = "https://marca-chancho.onrender.com/buscar"  # Reemplazá con el endpoint real
+
+    params = {
+        "app_id": app_id,
+        "keywords": q,
+        "page": 1,
+        "page_size": 5
     }
+
+    try:
+        response = httpx.get(url, params=params)
+        response.raise_for_status()
+        data = response.json()
+
+        # Adaptar según la estructura real de la API
+        resultados = [
+            {
+                "nombre": item["title"],
+                "precio": item["price"],
+                "imagen": item["image_url"],
+                "link": item["product_url"]
+            }
+            for item in data["products"]
+        ]
+
+        return {"resultados": resultados}
+
+    except Exception as e:
+        return {"error": str(e)}
