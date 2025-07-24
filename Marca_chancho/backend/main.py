@@ -9,7 +9,7 @@ from fastapi import FastAPI, Query
 from fastapi.middleware.cors import CORSMiddleware
 from pathlib import Path
 
-# 🔐 Cargar variables de entorno
+# 🔐 Cargar .env desde la carpeta actual (backend/)
 dotenv_path = Path(__file__).resolve().parent / ".env"
 load_dotenv(dotenv_path=dotenv_path)
 
