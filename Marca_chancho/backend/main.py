@@ -1,3 +1,5 @@
+# backend/main.py
+
 import os
 import time
 import httpx
@@ -7,25 +9,25 @@ from pathlib import Path
 from dotenv import load_dotenv
 from fastapi import FastAPI, Query
 from fastapi.middleware.cors import CORSMiddleware
-from pathlib import Path
-# 🔐 Cargar .env desde la carpeta actual (backend/)
+from typing import Dict
+
+# 🔐 Cargar variables de entorno
 dotenv_path = Path(__file__).resolve().parent / ".env"
 load_dotenv(dotenv_path=dotenv_path)
 
+# 🚀 Inicializar FastAPI
 app = FastAPI()
 
-# 🌐 Habilitar CORS
+# 🌐 Configurar CORS para permitir llamadas desde frontend
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Puedes restringir esto a tu frontend
+    allow_origins=["*"],  # Podés restringir a tu dominio luego
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# 🔐 Función para generar la firma
-from typing import Dict
-
+# 🔐 Función para generar firma AliExpress
 def generar_firma(app_secret: str, params: Dict[str, str]) -> str:
     sorted_params = sorted(params.items())
     concatenated = ''.join(f"{k}{v}" for k, v in sorted_params)
@@ -37,26 +39,27 @@ def generar_firma(app_secret: str, params: Dict[str, str]) -> str:
     ).hexdigest().upper()
     return signature
 
-# 🔎 Endpoint principal
+# 🔎 Ruta principal de búsqueda
 @app.get("/buscar")
 def buscar_producto(q: str = Query(..., description="Palabra clave para buscar productos")):
     app_id = os.getenv("ALIEXPRESS_APP_ID")
     app_secret = os.getenv("ALIEXPRESS_APP_SECRET")
 
     if not app_id or not app_secret:
-        raise RuntimeError("⚠️ Faltan credenciales. Verificá tu archivo .env")
+        raise RuntimeError("⚠️ Faltan credenciales. Revisá tu archivo .env")
 
     timestamp = int(time.time() * 1000)
 
     params = {
         "app_key": app_id,
-        "timestamp": timestamp,
+        "timestamp": str(timestamp),
         "keywords": q,
         "fields": "productId,productTitle,productUrl,imageUrl,salePrice",
         "sort": "commissionRateDown",
-        "page_size": 10
+        "page_size": "10"
     }
 
+    # Generar firma
     sign = generar_firma(app_secret, params)
     params["sign"] = sign
 
